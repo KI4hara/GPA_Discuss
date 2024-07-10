@@ -1,4 +1,5 @@
 // MQTT client details:
+var message;
 let broker = {
     //高高物理部サーバーのmqttサーバーに接続するための設定
     hostname: 'takataka.msep.jp/mqtt/',
@@ -104,7 +105,7 @@ let broker = {
           return;
       }
       console.log(recordedVoice);
-      var message = new Paho.MQTT.Message(recordedVoice);
+      message = new Paho.MQTT.Message(recordedVoice)+message;
       message.destinationName = topic3;
   
       // MQTTメッセージの送信
