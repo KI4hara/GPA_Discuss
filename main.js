@@ -1,0 +1,36 @@
+// This is a JavaScript file
+document.addEventListener('DOMContentLoaded', function() {
+    const startButton = document.getElementById('startButton');
+    const result = document.getElementById('result');
+
+    // 音声認識APIの使用
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = 'ja-JP'; // 日本語設定
+    recognition.interimResults = false; // 中間結果を返さない
+
+    // 音声認識開始時の処理
+    startButton.addEventListener('click', () => {
+        recognition.start();
+        result.textContent = 'Listening...';
+    });
+
+    // 音声認識成功時の処理
+    recognition.addEventListener('result', (event) => {
+        const transcript = event.results[0][0].transcript;
+        
+        result.textContent = `認識結果: ${transcript}`;
+    });
+
+    // 音声認識エラー時の処理
+    recognition.addEventListener('error', (event) => {
+        result.textContent = `Error occurred in recognition: ${event.error}`;
+    });
+
+    // 音声認識終了時の処理
+    recognition.addEventListener('end', () => {
+        result.textContent += ' (end)';
+    });
+});
+
