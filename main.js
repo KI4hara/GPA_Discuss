@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     recognition.addEventListener('result', (event) => {
         const transcript = event.results[0][0].transcript;
         
-        result.textContent =hyouzi+ `${transcript}` ;
+        result.textContent =selectedLetter+'   ' + hyouzi+ `${transcript}` ;
         hyouzi = result.textContent;
     });
 
