@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const startButton = document.getElementById('startButton');
     const result = document.getElementById('result');
+    var hyouzi;
 
     // 音声認識APIの使用
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -20,7 +21,8 @@ document.addEventListener('DOMContentLoaded', function() {
     recognition.addEventListener('result', (event) => {
         const transcript = event.results[0][0].transcript;
         
-        result.textContent = `認識結果: ${transcript}`;
+        result.textContent = `認識結果: ${transcript}` +hyouzi;
+        hyouzi = result.textContent;
     });
 
     // 音声認識エラー時の処理

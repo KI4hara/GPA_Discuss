@@ -105,7 +105,7 @@ let broker = {
           return;
       }
       console.log(recordedVoice);
-      message = new Paho.MQTT.Message(recordedVoice)+message;
+      message = new Paho.MQTT.Message(recordedVoice);
       message.destinationName = topic3;
   
       // MQTTメッセージの送信
