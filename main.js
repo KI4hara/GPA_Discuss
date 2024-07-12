@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 */
 // This is a JavaScript file
+// This is a JavaScript file
 document.addEventListener('DOMContentLoaded', function() {
     const startButton = document.getElementById('startButton');
     const result = document.getElementById('result');
@@ -67,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
     recognition.addEventListener('result', (event) => {
         const transcript = event.results[0][0].transcript;
         result.textContent = `${transcript}`;
+        send_voice();
         hyouzi = result.textContent;
     });
 
