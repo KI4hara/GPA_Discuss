@@ -1,4 +1,9 @@
 // MQTT client details:
+const API_TOKEN = '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';
+const GPT_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+const MODEL_NAME = 'gpt-4o';
+const MODEL_TEMP = 0.5;
+const MAX_TOKENS = 512;
 let broker = {
   //高高物理部サーバーのmqttサーバーに接続するための設定
   hostname: 'takataka.msep.jp/mqtt/',
@@ -50,6 +55,39 @@ function onMessageArrived(message) {
   console.log(message.destinationName);
   const voice_responce =message.payloadString;
   document.getElementById('response').textContent = voice_responce;
+    const messages = [{
+    'role': 'user',
+    'content': [{
+        // テキストデータを用意
+        "type": "text",
+        "text": voice_responce + "   左に挙げた英文は、この写真を説明するものです。この英文が適切かどうか、またよりよくするにはどうすればよいかなどを少し厳しめに判断して、まず初めに100点満点中何点かを書いてから簡潔にまとめてください。"
+    }]
+    }];
+
+    const headers = {
+    'Authorization': 'Bearer ' + API_TOKEN,
+    'Content-type': 'application/json',
+    };
+
+    const options = {
+    'method': 'POST',
+    'headers': headers,
+    'body': JSON.stringify({
+        'model': MODEL_NAME,
+        'max_tokens': MAX_TOKENS,
+        'temperature': MODEL_TEMP,
+        'messages': messages
+    })
+    };
+
+    fetch(GPT_ENDPOINT, options)
+    .then(response => response.json())
+    .then(data => {
+        // responseText を関数内で定義
+        const responseText = data.choices[0].message.content;
+        document.getElementById('response').textContent = responseText;
+    })
+    .catch(error => console.error(error));
   
   //受け取ったメッセージがtopic（photo)なら
   if(message.destinationName==topic4){
