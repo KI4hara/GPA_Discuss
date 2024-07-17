@@ -123,3 +123,42 @@ function displayImage(dataUrl) {
   img.src = dataUrl;
 }*/
 
+async function checkVolume() {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const source = audioContext.createMediaStreamSource(stream);
+
+        source.connect(analyser);
+        analyser.fftSize = 256;
+
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        const threshold = 50; // 音量のしきい値（0-255の範囲）
+        
+        return new Promise((resolve) => {
+            function checkVolumeLoop() {
+                analyser.getByteFrequencyData(dataArray);
+                let sum = 0;
+                for (let i = 0; i < bufferLength; i++) {
+                    sum += dataArray[i];
+                }
+                const averageVolume = sum / bufferLength;
+
+                if (averageVolume > threshold) {
+                    resolve(); // 音量がしきい値を超えたらPromiseを解決
+                    return;
+                }
+
+                requestAnimationFrame(checkVolumeLoop);
+            }
+
+            checkVolumeLoop();
+        });
+    } catch (err) {
+        console.error('エラーが発生しました:', err);
+    }
+}
+
