@@ -35,11 +35,10 @@ document.addEventListener('DOMContentLoaded', function() {
 */
 // This is a JavaScript file
 // This is a JavaScript file
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() { // asyncを追加
     const startButton = document.getElementById('startButton');
     const result = document.getElementById('result');
-    var hyouzi = '';
-
+    
     // 音声認識APIの使用
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
@@ -64,12 +63,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    await checkVolume(); // 音量判定を待機
+
     // 音声認識成功時の処理
     recognition.addEventListener('result', (event) => {
         const transcript = event.results[0][0].transcript;
         result.textContent = `${transcript}`;
         send_voice();
-        hyouzi = result.textContent;
     });
 
     // 音声認識エラー時の処理
