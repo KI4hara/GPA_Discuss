@@ -92,7 +92,7 @@ function onMessageArrived(message) {
   //受け取ったメッセージがtopic（photo)なら
   if(message.destinationName==topic4){
     //画像を表示
-    displayImage(message.payloadString);
+    //displayImage(message.payloadString);
   }
 
 }
