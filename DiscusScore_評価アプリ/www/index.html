@@ -1,0 +1,305 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta http-equiv="Content-Security-Policy" content="default-src * data: gap: content: https://ssl.gstatic.com; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'">
+    <script src="components/loader.js"></script>
+    <link rel="stylesheet" href="components/loader.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+
+
+  
+  /* 全体のスタイル */
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  h2 {
+    color: #007bff;
+    margin-top: 20px;
+  }
+
+  /* カスタムファイル選択 */
+  .file-upload-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 300px; /* Adjust the width as needed */
+    margin: 20px;
+  }
+
+  .file-upload-input {
+    display: none; /* Hide the default file input */
+  }
+
+  .file-upload-label {
+    display: block;
+    padding: 12px 20px;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    text-align: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, box-shadow 0.3s;
+  }
+
+  .file-upload-label:hover {
+    background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .file-upload-label:after {
+    content: 'ファイルを選択';
+  }
+
+  .file-upload-input:focus + .file-upload-label,
+  .file-upload-input:active + .file-upload-label {
+    outline: none;
+  }
+
+  .file-upload-input:valid + .file-upload-label:after {
+    content: 'ファイルが選択されました';
+  }
+
+  /* ボタンのスタイル */
+  button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 20px;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  /* ファイル入力デフォルトスタイルのオーバーライド */
+  input[type="file"] {
+    margin: 20px;
+    padding: 10px;
+    border: 2px solid #007bff;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #007bff;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+  }
+
+  input[type="file"]:hover {
+    background-color: #007bff;
+    color: #fff;
+  }
+
+  /* レスポンスエリアのスタイル */
+  #response {
+    margin: 20px;
+    font-size: 18px;
+    color: #333;
+  }
+
+  /* チャートコンテナ */
+  .chart-container {
+    width: 90%;
+    max-width: 600px;
+    margin: 20px auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  /* コメントエリア */
+  .comments {
+    margin-top: 20px;
+  }
+
+  .comments h3 {
+    color: #007bff;
+  }
+
+  .comments p {
+    font-size: 16px;
+    margin: 10px 0;
+  }
+
+  /* チャート */
+  canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>
+
+
+   
+<body>
+  <h2>ディベート・エバリューション</h2>
+  <div class="file-upload-wrapper">
+    <input type="file" id="fileInput" accept=".json" class="file-upload-input" onchange="handleFile(event)" />
+    <label for="fileInput" class="file-upload-label"></label>
+  </div>
+  <br>
+  <br>
+  <button onclick="requestGpt()">評価</button>
+  <div id="response"></div>
+  <div id="charts-container"></div>
+
+
+
+     <script>
+      const API_TOKEN = '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';
+      const GPT_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+      const MODEL_NAME = 'gpt-4o';
+      const MODEL_TEMP = 0.5;
+      //const MAX_TOKENS = 1024;
+
+      let a = '{"非認知能力": {"自分と向き合う力": {"自制心": "感情の起伏などを我慢する能力、精神力","忍耐力": "粘り強く頑張れる能力","レジリエンス": "困難の際に気持ちを切り替え、本来の力を発揮する能力","メタ認知": "自分の感情や考えを客観的に捉え言語化する力","主体性": "自分の意志で行動する姿勢、遂行する能力"},"自分を高める力": {"意欲": "やる気、集中力","向上心": "新しいことに挑む気質","グリット": "挫折をしても最後までやり抜く能力"},"他者とつながる力": {"協調性": "相手のことを考え、共に行動する力","コミュニケーション力": "リーダーシップ、思いやり、協調性","問題解決力": "自ら問題を発見・解決する能力","創造性": "クリエイティビティ、工夫をする能力"}}}';
+
+      let system_prompt = 'あなたは、会話履歴に基づいて、userごとに非認知能力を評価する評価者です。自分と向き合う力、自分を高める力、他者とつながる力をそれぞれ５段階で評価し、scoreをjsonで教えてください。これらの下の階層のscoreはいりません。また、議論への寄与、評価の理由と、改善点もjsonで教えてください。議論への寄与はテーマの深まりに影響を与えているかを評価し、100点満点で表してください。評価の理由や改善点は、自分と向き合う力、自分を高める力、他者とつながる力、および、議論への寄与に言及してください。userからは議論のテーマがthemeをキーとするjsonで与えられ、会話履歴がdialogueをキーとするjsonが与えられます。jsonで与えられるすべてのユーザーについて、jsonで回答してください。回答は全てJSON形式で回答してください。非認知能力は次のjsonで定義されます。' + a;
+
+      let assistant_prompt = '{evaluation:[ {user:"","自分と向き合う力": "", "自分を高める力": "", "他者とつながる力": "", "議論への寄与": "","評価の理由": "", "改善点": ""}]}';
+
+      let jsonData = null; // JSONデータを格納するための変数
+
+      function requestGpt() {
+        if (!jsonData) {
+          alert('JSONデータが読み込まれていません。');
+          return;
+        }
+
+        const messages = [
+            { 'role': 'system', 'content': system_prompt },
+            { 'role': 'assistant', 'content': assistant_prompt },
+            { 'role': 'user', 'content': JSON.stringify(jsonData) }
+        ];
+
+        const headers = {
+          'Authorization': 'Bearer ' + API_TOKEN,
+          'Content-type': 'application/json',
+        };
+
+        const options = {
+          'method': 'POST',
+          'headers': headers,
+          'body': JSON.stringify({
+            'model': MODEL_NAME,
+            //'max_tokens': MAX_TOKENS,
+            'temperature': MODEL_TEMP,
+            //json modeに指定。レスポンスがjsonになる。
+            'response_format': { 'type': 'json_object' },
+            'messages': messages
+          })
+        };
+
+        fetch(GPT_ENDPOINT, options)
+          .then(response => response.json())
+          .then(data => {
+            const responseText = data.choices[0].message.content;
+
+            //document.getElementById('response').textContent = responseText;
+
+            let jsonResponse = JSON.parse(responseText);
+
+            drawRadarChart(jsonResponse);
+          })
+          .catch(error => console.error(error));
+      }
+
+      function handleFile(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          try {
+            jsonData = JSON.parse(e.target.result);
+          } catch (error) {
+            console.error('無効なJSONファイル:', error);
+            alert('無効なJSONファイルです。');
+          }
+        };
+        
+        reader.readAsText(file);
+      }
+
+    //レーダーチャート描画関数
+    function drawRadarChart(data) {
+      // グラフを表示するためのコンテナ
+      const chartsContainer = document.getElementById('charts-container');
+      chartsContainer.innerHTML = ''; // 既存のコンテンツをクリア
+
+      // 各ユーザーの評価を基にレーダーチャートとコメントを作成
+      data.evaluation.forEach(userEval => {
+        // チャートとコメントを格納するコンテナ
+        const chartContainer = document.createElement('div');
+        chartContainer.classList.add('chart-container');
+
+        // チャートを描画するためのキャンバス要素を作成
+        const canvas = document.createElement('canvas');
+        chartContainer.appendChild(canvas);
+
+        // 評価の理由と改善点のコメントを表示する要素を作成
+        const comments = document.createElement('div');
+        comments.classList.add('comments');
+        comments.innerHTML = `
+          <h3>ユーザー ${userEval.user}</h3>
+          <p><strong>議論への寄与:</strong> ${userEval["議論への寄与"]}点</p>
+          <p><strong>評価の理由:</strong> ${userEval["評価の理由"]}</p>
+          <p><strong>改善点:</strong> ${userEval["改善点"]}</p>
+        `;
+        chartContainer.appendChild(comments);
+
+        // レーダーチャートを描画
+        new Chart(canvas, {
+          type: 'radar',
+          data: {
+            labels: [
+              '自分と向き合う力', '自分を高める力', '他者とつながる力'
+            ],
+            datasets: [{
+              label: `ユーザー ${userEval.user}`,
+              data: [
+                userEval["自分と向き合う力"],
+                userEval["自分を高める力"],
+                userEval["他者とつながる力"]
+              ],
+              backgroundColor: 'rgba(0, 123, 255, 0.2)',
+              borderColor: 'rgba(0, 123, 255, 1)',
+              pointBackgroundColor: 'rgba(0, 123, 255, 1)'
+            }]
+          },
+          options: {
+            scales: {
+              r: {
+                beginAtZero: true,
+                max: 5
+              }
+            }
+          }
+        });
+
+        chartsContainer.appendChild(chartContainer);
+      });
+    }
+
+    </script>
+    
+  </body>
+</html>
