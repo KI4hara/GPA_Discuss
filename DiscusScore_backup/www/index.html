@@ -399,7 +399,7 @@ async function saveTempJsonArray(tempJsonArray) {
 
 //感情分析を行う関数（GoogleAPI）
 async function analyzeSentiment(text) {
-            const apiKey = 'AIzaSyBUlDlojOibmfVQsbr-ZxdWYhdulKAxlYk'; // ここにAPIキーを追加
+            const apiKey = ''; // ここにAPIキーを追加
             const url = `https://language.googleapis.com/v1/documents:analyzeSentiment?key=${apiKey}`;
             const response = await fetch(url, {
                 method: 'POST',
